@@ -1,12 +1,16 @@
+import { useEffect } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Heading, MultiStep, Text, TextInput } from "@ignite-ui/react";
+import { AxiosError } from "axios";
 import { useRouter } from "next/router";
 import { ArrowRight } from "phosphor-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { api } from "@/lib/axios";
+
 import { Container, ErrorMessage, Form, Header } from "./styles";
-import { useEffect } from "react";
 
 type RegisterFormData = z.infer<typeof registerFormSchema>;
 
@@ -33,7 +37,20 @@ export default function Register() {
 
   const router = useRouter();
 
-  async function handleRegistration(data: RegisterFormData) {}
+  async function handleRegistration(data: RegisterFormData) {
+    try {
+      await api.post("/users", {
+        name: data.name,
+        username: data.username,
+      });
+    } catch (error) {
+      if (error instanceof AxiosError && error?.response?.data.message) {
+        return alert(error.response.data.message);
+      }
+
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
     if (router.query.username) {
