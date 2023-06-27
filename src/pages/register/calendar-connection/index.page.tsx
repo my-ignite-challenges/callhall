@@ -3,8 +3,6 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { ArrowRight, Check } from "phosphor-react";
 
-import { api } from "@/lib/axios";
-
 import { Container, Header } from "../styles";
 import { AuthErrorMessage, ConnectionBox, ConnectionItem } from "./styles";
 
@@ -17,6 +15,10 @@ export default function CalendarConnection() {
 
   async function handleCalendarConnection() {
     await signIn("google");
+  }
+
+  async function handleNavigationToNextStep() {
+    await router.push("/register/time-intervals");
   }
 
   return (
@@ -58,7 +60,11 @@ export default function CalendarConnection() {
           </AuthErrorMessage>
         )}
 
-        <Button type="submit" disabled={!userIsSignedIn}>
+        <Button
+          type="submit"
+          disabled={!userIsSignedIn}
+          onClick={handleNavigationToNextStep}
+        >
           Próximo passo
           <ArrowRight />
         </Button>
