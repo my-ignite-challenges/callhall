@@ -1,4 +1,4 @@
-export function getWeekDays() {
+export function getWeekDays(length: "short" | "long" = "long") {
   const weekDayFormatter = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
   });
@@ -7,7 +7,11 @@ export function getWeekDays() {
     .map(
       (day) => weekDayFormatter.format(new Date(Date.UTC(2021, 5, day))) // month and year where the month starts on Sunday (0)
     )
-    .map((weekDay) =>
-      weekDay.split("")[0].toUpperCase().concat(weekDay.substring(1))
-    );
+    .map((weekDay) => {
+      if (length === "short") {
+        return weekDay.substring(0, 3).toUpperCase();
+      }
+
+      return weekDay.split("")[0].toUpperCase().concat(weekDay.substring(1));
+    });
 }
