@@ -11,7 +11,7 @@ export function getWeekDays(length: "short" | "long" = "long") {
       if (length === "short") {
         return weekDay.substring(0, 3).toUpperCase();
       }
-
+      2022;
       return weekDay.split("")[0].toUpperCase().concat(weekDay.substring(1));
     });
 }

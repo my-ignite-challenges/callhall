@@ -8,7 +8,7 @@ import {
 } from "./styles";
 
 export function CalendarStep() {
-  const hasSelectedDays = true;
+  const hasSelectedDays = false;
 
   return (
     <Container showTimePicker={hasSelectedDays}>

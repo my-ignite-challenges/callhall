@@ -1,21 +1,43 @@
+import { useState } from "react";
+
+import dayjs from "dayjs";
 import { CaretLeft, CaretRight } from "phosphor-react";
-import { Actions, Body, Container, Day, Header, Title } from "./styles";
+
 import { getWeekDays } from "@/utils/getWeekDays";
 
+import { Actions, Body, Container, Day, Header, Title } from "./styles";
+
 export function Calendar() {
+  const [currentDate, setCurrentDate] = useState(() => {
+    return dayjs().set("date", 1);
+  });
+
   const weekDays = getWeekDays("short");
+
+  const currentMonth = currentDate.format("MMMM");
+  const currentYear = currentDate.format("YYYY");
+
+  function showPreviousMonth() {
+    const previousMonthDate = currentDate.subtract(1, "month");
+    setCurrentDate(previousMonthDate);
+  }
+
+  function showNextMonth() {
+    const nextMonthDate = currentDate.add(1, "month");
+    setCurrentDate(nextMonthDate);
+  }
 
   return (
     <Container>
       <Header>
         <Title>
-          Dezembro <span>2022</span>
+          {currentMonth} <span>{currentYear}</span>
         </Title>
         <Actions>
-          <button>
+          <button onClick={showPreviousMonth} title="Previous month">
             <CaretLeft />
           </button>
-          <button>
+          <button onClick={showNextMonth} title="Next month">
             <CaretRight />
           </button>
         </Actions>
