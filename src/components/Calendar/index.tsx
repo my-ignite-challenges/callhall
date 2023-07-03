@@ -17,7 +17,12 @@ type CalendarRow = {
 
 type CalendarRows = CalendarRow[];
 
-export function Calendar() {
+type CalendarProps = {
+  selectedDate: Date | null;
+  onDateSelection: (date: Date | null) => void;
+};
+
+export function Calendar({ selectedDate, onDateSelection }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(() => {
     return dayjs().set("date", 1);
   });
@@ -72,7 +77,7 @@ export function Calendar() {
       })),
       ...daysInTheCurrentMonth.map((date) => ({
         date,
-        disabled: false,
+        disabled: date.endOf("day").isBefore(new Date()),
       })),
       ...daysAfterTheEndOfTheCurrentMonth.map((date) => ({
         date,
@@ -128,7 +133,12 @@ export function Calendar() {
             <tr key={week}>
               {days.map(({ date, disabled }) => (
                 <td key={date.toString()}>
-                  <Day disabled={disabled}>{date.get("date")}</Day>
+                  <Day
+                    disabled={disabled}
+                    onClick={() => onDateSelection(date.toDate())}
+                  >
+                    {date.get("date")}
+                  </Day>
                 </td>
               ))}
             </tr>

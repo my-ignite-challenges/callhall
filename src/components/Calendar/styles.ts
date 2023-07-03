@@ -86,7 +86,7 @@ export const Day = styled("button", {
     opacity: 0.4,
   },
 
-  "&:not(:disable):hover": {
+  "&:not(:disabled):hover": {
     background: "$gray500",
   },
 
