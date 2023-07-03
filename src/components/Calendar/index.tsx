@@ -44,9 +44,9 @@ export function Calendar() {
       return currentDate.set("date", index + 1);
     });
 
-    const firstDayOfTheWeekInTheCurrentMonth = currentDate.get("day");
+    const firstWeekDayInTheCurrentMonth = currentDate.get("day");
     const daysBeforeTheStartOfTheCurrentMonth = Array.from({
-      length: firstDayOfTheWeekInTheCurrentMonth,
+      length: firstWeekDayInTheCurrentMonth,
     })
       .map((_, index) => {
         return currentDate.subtract(index + 1, "day");
@@ -58,11 +58,10 @@ export function Calendar() {
       currentDate.daysInMonth()
     );
 
-    const lastDayOfTheWeekInTheCurrentMonth =
-      lastDayInTheCurrentMonth.get("day");
+    const lastWeekDayInTheCurrentMonth = lastDayInTheCurrentMonth.get("day");
 
     const daysAfterTheEndOfTheCurrentMonth = Array.from({
-      length: 7 - (lastDayOfTheWeekInTheCurrentMonth + 1),
+      length: 7 - (lastWeekDayInTheCurrentMonth + 1),
       // 7 refers to seven days in a week.
     }).map((_, index) => lastDayInTheCurrentMonth.add(index + 1, "day"));
 
