@@ -9,7 +9,7 @@ import { ConfirmationForm, FormActions, FormError, Header } from "./styles";
 const confirmationFormSchema = z.object({
   name: z.string().min(3, "O nome deve conter pelo menos 3 caracteres."),
   email: z.string().email({ message: "Formato de e-mail inválido." }),
-  observations: z.string().nullable(),
+  remarks: z.string().nullable(),
 });
 
 type ConfirmationFormData = z.infer<typeof confirmationFormSchema>;
@@ -60,7 +60,7 @@ export function ConfirmationStep() {
 
       <label>
         <Text size="sm">Observações</Text>
-        <TextArea {...register("observations")} />
+        <TextArea {...register("remarks")} />
       </label>
 
       <FormActions>
