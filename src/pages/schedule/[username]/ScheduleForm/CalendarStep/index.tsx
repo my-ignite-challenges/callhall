@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 
@@ -21,8 +22,6 @@ type UserScheduleAvailability = {
 
 export function CalendarStep() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [userScheduleAvailability, setUserScheduleAvailability] =
-    useState<UserScheduleAvailability | null>(null);
 
   const router = useRouter();
 
@@ -34,21 +33,28 @@ export function CalendarStep() {
     ? dayjs(selectedDate).format("DD[ de ]MMMM")
     : null;
 
-  useEffect(() => {
-    if (!selectedDate) {
-      return;
-    }
+  const dateQueryParam = selectedDate
+    ? dayjs(selectedDate).format("YYYY-MM-DD")
+    : null;
 
-    api
-      .get(`/users/${username}/schedule-availability`, {
-        params: {
-          date: dayjs(selectedDate).format("YYYY-MM-DD"),
-        },
-      })
-      .then((response) => {
-        setUserScheduleAvailability(response.data);
-      });
-  }, [selectedDate, username]);
+  const { data: userScheduleAvailability } = useQuery<UserScheduleAvailability>(
+    ["userScheduleAvailability", dateQueryParam],
+    async () => {
+      const response = await api.get(
+        `/users/${username}/schedule-availability`,
+        {
+          params: {
+            date: dateQueryParam,
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      enabled: !!selectedDate,
+    }
+  );
 
   return (
     <Container showTimePicker={hasSelectedDate}>
