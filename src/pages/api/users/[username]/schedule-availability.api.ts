@@ -75,12 +75,15 @@ export default async function handler(
     },
   });
 
-  const remainingAvailableHours = initialAvailableHoursList.filter(
-    (hour) =>
-      !unavailableHours.some(
-        (unavailableHour) => unavailableHour.date.getHours() === hour
-      )
-  );
+  const remainingAvailableHours = initialAvailableHoursList.filter((hour) => {
+    const isUnavailableForScheduling = unavailableHours.some(
+      (unavailableHour) => unavailableHour.date.getHours() === hour
+    );
+
+    const isPastHour = givenDate.set("hour", hour).isBefore(new Date());
+
+    return !isUnavailableForScheduling && !isPastHour;
+  });
 
   return res.json({ initialAvailableHoursList, remainingAvailableHours });
 }

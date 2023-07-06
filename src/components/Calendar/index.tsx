@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
 import { CaretLeft, CaretRight } from "phosphor-react";
 
+import { api } from "@/lib/axios";
 import { getWeekDays } from "@/utils/getWeekDays";
 
 import { Actions, Body, Container, Day, Header, Title } from "./styles";
@@ -17,20 +20,46 @@ type CalendarRow = {
 
 type CalendarRows = CalendarRow[];
 
+type UnavailableDates = {
+  unavailableWeekDays: number[];
+  unavailableDatesList: number[];
+};
+
 type CalendarProps = {
   selectedDate: Date | null;
   onDateSelection: (date: Date | null) => void;
 };
 
-export function Calendar({ selectedDate, onDateSelection }: CalendarProps) {
+export function Calendar({ onDateSelection }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(() => {
     return dayjs().set("date", 1);
   });
+
+  const router = useRouter();
 
   const weekDays = getWeekDays("short");
 
   const currentMonth = currentDate.format("MMMM");
   const currentYear = currentDate.format("YYYY");
+
+  const username = String(router.query.username);
+
+  const { data: unavailableDates } = useQuery<UnavailableDates>(
+    ["unavailable-dates", currentDate.get("year"), currentDate.get("month")],
+    async () => {
+      const response = await api.get(
+        `/users/${username}/schedule-unavailable-dates`,
+        {
+          params: {
+            year: currentDate.get("year"),
+            month: String(currentDate.get("month") + 1).padStart(2, "0"),
+          },
+        }
+      );
+
+      return response.data;
+    }
+  );
 
   function showPreviousMonth() {
     const previousMonthDate = currentDate.subtract(1, "month");
@@ -43,6 +72,10 @@ export function Calendar({ selectedDate, onDateSelection }: CalendarProps) {
   }
 
   const calendarWeeks = useMemo(() => {
+    if (!unavailableDates) {
+      return [];
+    }
+
     const daysInTheCurrentMonth = Array.from({
       length: currentDate.daysInMonth(),
     }).map((_, index) => {
@@ -77,7 +110,10 @@ export function Calendar({ selectedDate, onDateSelection }: CalendarProps) {
       })),
       ...daysInTheCurrentMonth.map((date) => ({
         date,
-        disabled: date.endOf("day").isBefore(new Date()),
+        disabled:
+          date.endOf("day").isBefore(new Date()) ||
+          unavailableDates.unavailableWeekDays.includes(date.get("day")) ||
+          unavailableDates?.unavailableDatesList?.includes(date.get("date")),
       })),
       ...daysAfterTheEndOfTheCurrentMonth.map((date) => ({
         date,
@@ -102,7 +138,7 @@ export function Calendar({ selectedDate, onDateSelection }: CalendarProps) {
     );
 
     return calendarRows;
-  }, [currentDate]);
+  }, [currentDate, unavailableDates]);
 
   return (
     <Container>
