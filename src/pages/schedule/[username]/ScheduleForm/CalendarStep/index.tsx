@@ -20,7 +20,11 @@ type UserScheduleAvailability = {
   remainingAvailableHours: number[];
 };
 
-export function CalendarStep() {
+type CalendarStepProps = {
+  onDateTimeSelection: (date: Date) => void;
+};
+
+export function CalendarStep({ onDateTimeSelection }: CalendarStepProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const router = useRouter();
@@ -56,6 +60,15 @@ export function CalendarStep() {
     }
   );
 
+  function handleTimeSelection(hour: number) {
+    const dateAndTime = dayjs(selectedDate)
+      .set("hour", hour)
+      .startOf("hour")
+      .toDate();
+
+    onDateTimeSelection(dateAndTime);
+  }
+
   return (
     <Container showTimePicker={hasSelectedDate}>
       <Calendar selectedDate={selectedDate} onDateSelection={setSelectedDate} />
@@ -75,6 +88,7 @@ export function CalendarStep() {
                     hour
                   )
                 }
+                onClick={() => handleTimeSelection(hour)}
               >
                 {String(hour).padStart(2, "0")}:00h
               </TimePickerOption>

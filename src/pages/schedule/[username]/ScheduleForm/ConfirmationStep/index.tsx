@@ -1,8 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Text, TextArea, TextInput } from "@ignite-ui/react";
+import dayjs from "dayjs";
+import { useRouter } from "next/router";
 import { CalendarBlank, Clock } from "phosphor-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { api } from "@/lib/axios";
 
 import { ConfirmationForm, FormActions, FormError, Header } from "./styles";
 
@@ -14,7 +18,15 @@ const confirmationFormSchema = z.object({
 
 type ConfirmationFormData = z.infer<typeof confirmationFormSchema>;
 
-export function ConfirmationStep() {
+type ConfirmationStepProps = {
+  scheduleDate: Date;
+  dismissOrGoBack: () => void;
+};
+
+export function ConfirmationStep({
+  scheduleDate,
+  dismissOrGoBack,
+}: ConfirmationStepProps) {
   const {
     register,
     handleSubmit,
@@ -23,7 +35,26 @@ export function ConfirmationStep() {
     resolver: zodResolver(confirmationFormSchema),
   });
 
-  function handleScheduleConfirmation(data: ConfirmationFormData) {}
+  const router = useRouter();
+  const username = String(router.query.username);
+
+  async function handleScheduleConfirmation(data: ConfirmationFormData) {
+    const { name, email, remarks } = data;
+
+    await api.post(`/users/${username}/schedule`, {
+      name,
+      email,
+      remarks,
+      date: scheduleDate,
+    });
+
+    dismissOrGoBack();
+  }
+
+  const formattedScheduledDate = dayjs(scheduleDate).format(
+    "DD[ de ]MMMM[ de ]YYYY"
+  );
+  const formattedScheduledTime = dayjs(scheduleDate).format("HH:mm[h]");
 
   return (
     <ConfirmationForm
@@ -33,11 +64,11 @@ export function ConfirmationStep() {
       <Header>
         <Text>
           <CalendarBlank />
-          22 de setembro de 2022
+          {formattedScheduledDate}
         </Text>
         <Text>
           <Clock />
-          18:00h
+          {formattedScheduledTime}
         </Text>
       </Header>
       <label>
@@ -64,7 +95,7 @@ export function ConfirmationStep() {
       </label>
 
       <FormActions>
-        <Button type="button" variant="tertiary">
+        <Button type="button" variant="tertiary" onClick={dismissOrGoBack}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
