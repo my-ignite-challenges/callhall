@@ -1,8 +1,10 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
+import { NextApiRequest, NextApiResponse } from "next";
+import { google } from "googleapis";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { getGoogleOauthToken } from "@/lib/google";
 
 export default async function handler(
   req: NextApiRequest,
@@ -53,13 +55,42 @@ export default async function handler(
     });
   }
 
-  await prisma.schedule.create({
+  const appointment = await prisma.schedule.create({
     data: {
       date: scheduleDate.toDate(),
       name,
       email,
       remarks,
       user_id: user.id,
+    },
+  });
+
+  const calendar = google.calendar({
+    version: "v3",
+    auth: await getGoogleOauthToken(user.id),
+  });
+
+  await calendar.events.insert({
+    calendarId: "primary",
+    conferenceDataVersion: 1,
+    requestBody: {
+      summary: `Call Hall: ${name}`,
+      description: remarks,
+      start: {
+        dateTime: scheduleDate.format(),
+      },
+      end: {
+        dateTime: scheduleDate.add(1, "hour").format(),
+      },
+      attendees: [{ email, displayName: name }],
+      conferenceData: {
+        createRequest: {
+          requestId: appointment.id,
+          conferenceSolutionKey: {
+            type: "hangoutsMeet",
+          },
+        },
+      },
     },
   });
 
